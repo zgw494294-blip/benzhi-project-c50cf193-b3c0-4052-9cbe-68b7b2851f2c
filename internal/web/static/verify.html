@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>入库凭据验证</title><link rel="stylesheet" href="/assets/app.css"></head>
+<body class="verify-page">
+  <header class="topbar"><div><span class="eyebrow">SEED VAULT · VERIFY</span><h1>入库凭据验证</h1></div><nav><a href="/">返回工作台</a></nav></header>
+  <main class="verify-main">
+    <section class="verify-card"><span class="step">公开验证</span><h2>核对冻结快照摘要</h2><p>输入凭据编号与 64 位摘要，系统会与本地不可变投影比对，不会泄露额外批次资料。</p>
+      <form id="verify-form"><label>凭据编号<input name="credential_id" required placeholder="credential-..."></label><label>快照摘要<textarea name="digest" required placeholder="64 位 SHA-256"></textarea></label><button class="primary" type="submit">验证凭据</button></form>
+      <div id="verify-result" aria-live="polite"></div>
+    </section>
+  </main>
+  <script src="/assets/verify.js" defer></script>
+</body>
+</html>
+

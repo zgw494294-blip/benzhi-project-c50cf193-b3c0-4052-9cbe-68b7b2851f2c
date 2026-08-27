@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>种源活力入库核验台</title>
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><span class="eyebrow">SEED VAULT · QUALITY GATE</span><h1>种源活力入库核验台</h1></div>
+    <nav><a href="#batches">批次</a><a href="#operate">流程操作</a><a href="/verify">验证凭据</a></nav>
+  </header>
+  <main>
+    <section class="hero">
+      <div><p class="kicker">从接收到签发，一条可追溯责任链</p><h2>让每一份入库种源，都带着可验证的检测证据。</h2></div>
+      <div class="status-card"><span>当前服务</span><strong>本地事件账本</strong><small>版本控制 · 摘要链 · 原子快照</small></div>
+    </section>
+
+    <section id="batches" class="panel">
+      <div class="section-title"><div><span class="step">01</span><h2>批次建档</h2></div><button id="refresh" class="ghost">刷新批次</button></div>
+      <form id="batch-form" class="form-grid">
+        <label>批次编号<input name="batch_id" placeholder="可留空自动生成"></label>
+        <label>物种<select name="species_name"><option>小麦</option><option>水稻</option><option>玉米</option><option>大豆</option></select></label>
+        <label>来源地区<input name="source_region" required value="甘肃省张掖市"></label>
+        <label>采收日期<input name="harvest_date" type="date" required></label>
+        <label>分装样本数<input name="sample_count" type="number" min="1" value="400" required></label>
+        <label>贮藏条件<input name="storage_condition" value="低温干燥，10℃" required></label>
+        <label>接收员<input name="actor" value="接收员-01" required></label>
+        <button type="submit" class="primary">建立批次档案</button>
+      </form>
+      <form id="batch-filter" class="form-grid compact">
+        <label>物种<select name="species"><option value="">全部物种</option><option>小麦</option><option>水稻</option><option>玉米</option><option>大豆</option></select></label>
+        <label>状态<select name="status"><option value="">全部状态</option><option value="DRAFT">草稿</option><option value="TESTING">待检测</option><option value="REMEDIATION_REQUIRED">待整改</option><option value="READY_REVIEW">待复核</option><option value="REVIEW_RETURNED">复核退回</option><option value="REVIEW_APPROVED">复核通过</option><option value="FROZEN">已冻结</option></select></label>
+        <label>来源地区<input name="source_region"></label>
+        <label>采收起始<input name="harvest_from" type="date"></label>
+        <label>采收结束<input name="harvest_to" type="date"></label>
+        <button type="submit" class="ghost">筛选批次</button>
+      </form>
+      <div id="batch-stats" class="selection" aria-live="polite"></div>
+      <div id="batch-list" class="batch-list" aria-live="polite"></div>
+    </section>
+
+    <section id="operate" class="panel hidden">
+      <div class="section-title"><div><span class="step">02</span><h2>检测与流程推进</h2></div><div id="selection" class="selection"></div></div>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="test">检测录入</button>
+        <button class="tab" data-tab="remediation">异常整改</button>
+        <button class="tab" data-tab="review">复核冻结</button>
+        <button class="tab" data-tab="audit">证据与审计</button>
+      </div>
+      <div id="tab-test" class="tab-panel">
+        <form id="test-form" class="form-grid">
+          <label>检测编号<input name="test_id" placeholder="TEST-001" required></label>
+          <label>方法代码<select name="method_code"><option>GB/T3543</option><option>ISTA</option></select></label>
+          <label>重复次数<input name="replicates" type="number" value="4" min="1" required></label>
+          <label>发芽率 %<input name="germination_rate" type="number" step="0.01" value="90" required></label>
+          <label>纯度 %<input name="purity_rate" type="number" step="0.01" value="99" required></label>
+          <label>含水率 %<input name="moisture_rate" type="number" step="0.01" value="11" required></label>
+          <label class="check"><input name="contamination_flag" type="checkbox">观察到污染</label>
+          <label>污染说明<input name="contamination_note" placeholder="无污染时留空"></label>
+          <label>证据文字<input name="evidence_text" value="实验原始记录-001" required><small>页面将生成 SHA-256 摘要</small></label>
+          <label>检测员<input name="actor" value="检测员-01" required></label>
+          <button type="submit" class="primary">保存检测并执行规则</button>
+        </form>
+        <div id="quality-result"></div>
+      </div>
+      <div id="tab-remediation" class="tab-panel hidden">
+        <form id="remediation-form" class="form-grid">
+          <label>原测编号<input name="original_test_id" required></label>
+          <label>复测编号<input name="retest_id" required></label>
+          <label class="wide">问题代码（逗号分隔）<input name="issue_codes" required></label>
+          <label class="wide">整改说明<textarea name="explanation" required>完成样本重新清选与低温平衡后，使用替代样本复测。</textarea></label>
+          <label>方法代码<input name="method_code" value="GB/T3543" required></label>
+          <label>重复次数<input name="replicates" type="number" value="4" required></label>
+          <label>复测发芽率 %<input name="germination_rate" type="number" step="0.01" value="91" required></label>
+          <label>复测纯度 %<input name="purity_rate" type="number" step="0.01" value="99" required></label>
+          <label>复测含水率 %<input name="moisture_rate" type="number" step="0.01" value="11" required></label>
+          <label>复测证据文字<input name="evidence_text" value="整改复测原始记录-001" required></label>
+          <label>提交人<input name="actor" value="接收员-01" required></label>
+          <button type="submit" class="primary">提交整改与替代复测</button>
+        </form>
+      </div>
+      <div id="tab-review" class="tab-panel hidden">
+        <form id="review-form" class="form-grid compact">
+          <label>复核决定<select name="decision"><option value="APPROVE">通过</option><option value="RETURN">退回补充</option></select></label>
+          <label>复核员<input name="actor" value="复核员-01" required></label>
+          <label>问题引用（逗号分隔）<input name="issue_refs"></label>
+          <label class="wide">复核意见<textarea name="comment">检测方案、阈值与证据摘要完整，同意入库。</textarea></label>
+          <button type="submit" class="primary">提交独立复核</button>
+        </form>
+        <div class="freeze-box"><div><strong>冻结并签发</strong><p>仅独立复核通过的批次可由管理员冻结。冻结后批次不可再编辑。</p></div><input id="admin" value="管理员-01" aria-label="管理员"><button id="freeze" class="danger">冻结核验快照</button></div>
+        <div id="credential-result"></div>
+      </div>
+      <div id="tab-audit" class="tab-panel hidden"><div id="preview"></div><div id="manifest"></div><div id="timeline" class="timeline"></div></div>
+    </section>
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+  </main>
+  <footer>种源活力入库核验台 · 数据保存在本机工作目录 · <a href="/verify">打开凭据验证页</a></footer>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>
