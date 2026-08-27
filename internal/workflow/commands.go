@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -14,6 +15,11 @@ import (
 )
 
 func (s *Service) CreateBatch(command CreateBatchCommand) (BatchRecord, error) {
+	return s.CreateBatchContext(context.Background(), command)
+}
+
+// CreateBatchContext 接收请求生命周期，供 HTTP 写入链路传播取消信号。
+func (s *Service) CreateBatchContext(_ context.Context, command CreateBatchCommand) (BatchRecord, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	command.BatchID = strings.TrimSpace(command.BatchID)

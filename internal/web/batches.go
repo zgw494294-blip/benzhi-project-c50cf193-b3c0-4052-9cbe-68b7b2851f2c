@@ -60,7 +60,7 @@ func (s *Server) HandleCreateBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	command.IdempotencyKey = requestKey(r, command.IdempotencyKey)
-	record, err := s.workflow.CreateBatch(command)
+	record, err := s.workflow.CreateBatchContext(r.Context(), command)
 	if err != nil {
 		writeDomainError(w, err)
 		return
